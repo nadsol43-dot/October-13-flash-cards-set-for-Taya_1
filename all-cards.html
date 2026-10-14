@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Word Collocations — Flashcards (EN ⇄ RU)</title>
+<style>
+  :root{
+    --ink:#16324f; --muted:#6b7f96; --good:#1a9d63; --again:#d64545;
+    --blue:#2f6fed; --gold:#b8860b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:"Segoe UI",Roboto,-apple-system,Arial,sans-serif;color:var(--ink);
+       background:linear-gradient(160deg,#eaf1ff 0%,#f8fbff 55%,#eef7f2 100%);min-height:100vh;
+       display:flex;justify-content:center;padding:16px}
+  .wrap{width:100%;max-width:700px;display:flex;flex-direction:column;gap:12px}
+  h1{margin:0;font-size:1.25rem;text-align:center}
+  .sub{color:var(--muted);font-size:.85rem;text-align:center;margin-top:2px}
+  .tabs{display:flex;background:#fff;border:1px solid #dbe6f6;border-radius:14px;padding:4px;gap:4px}
+  .tabs button{flex:1;border:0;background:transparent;border-radius:11px;padding:10px 6px;font-size:.92rem;
+       font-weight:700;color:var(--muted);cursor:pointer;transition:.2s;font-family:inherit}
+  .tabs button.active{background:var(--blue);color:#fff}
+  .tabs button.active.gold{background:var(--gold)}
+  .stats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
+  .chip{background:#fff;border:1px solid #d7e3f5;border-radius:999px;padding:4px 11px}
+  .chip b{color:var(--blue)}
+  .bar{height:7px;background:#dfe8f6;border-radius:99px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2f6fed,#57b894);transition:width .25s}
+  .scene{perspective:1500px;height:312px}
+  .card{position:relative;width:100%;height:100%;transform-style:preserve-3d;
+        transition:transform .5s cubic-bezier(.4,.1,.2,1);cursor:pointer}
+  .card.flip{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+        border-radius:20px;padding:24px 20px;display:flex;flex-direction:column;justify-content:center;
+        align-items:center;text-align:center;background:#fff;border:1px solid #e3ebf8;
+        box-shadow:0 12px 30px rgba(22,50,79,.12)}
+  .tag{position:absolute;top:13px;left:17px;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;
+       color:var(--muted);font-weight:700}
+  .idx{position:absolute;top:13px;right:17px;font-size:.74rem;color:var(--muted);font-weight:700}
+  .word{font-size:clamp(1.35rem,5.6vw,2rem);font-weight:800;line-height:1.25}
+  .front .word{color:#1a3e6e}
+  .back{transform:rotateY(180deg);background:linear-gradient(155deg,#f2f8ff,#e9f4ee)}
+  .back .word{color:#0f5132}
+  .hr-line{width:64px;height:3px;border-radius:9px;background:var(--blue);opacity:.4;margin:14px 0 10px}
+  .orig{font-size:.92rem;font-weight:700;color:var(--muted)}
+  .hint{margin-top:12px;font-size:.78rem;color:var(--muted)}
+  .btns{display:flex;gap:9px}
+  button{font-family:inherit}
+  .big{border:0;border-radius:14px;padding:14px 10px;font-size:.98rem;font-weight:700;cursor:pointer;flex:1;
+       transition:transform .08s}
+  .big:active{transform:scale(.98)}
+  .again{background:#ffe9e9;color:var(--again)}
+  .good{background:#e2f6ec;color:var(--good)}
+  .nav{display:flex;gap:8px}
+  .nav button{flex:1;background:#fff;border:1px solid #d7e3f5;color:var(--ink);font-weight:600;
+       padding:11px 6px;border-radius:12px;font-size:.88rem;cursor:pointer}
+  .foot{text-align:center;font-size:.75rem;color:var(--muted);padding-bottom:8px}
+  .hidden{display:none!important}
+  .done{background:#fff;border-radius:18px;padding:28px 20px;text-align:center;
+        box-shadow:0 12px 30px rgba(22,50,79,.12)}
+  .done h2{margin:0 0 8px;font-size:1.2rem}
+  .done p{color:var(--muted);font-size:.9rem}
+  .done .row{display:flex;gap:9px;max-width:420px;margin:14px auto 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Word Collocations · Flashcards</h1>
+    <div class="sub">19 collocations from the notebook · tap the card to flip</div>
+  </header>
+
+  <div class="tabs">
+    <button id="tabEn" class="active" onclick="setMode('en2ru')">English → Русский</button>
+    <button id="tabRu" class="gold" onclick="setMode('ru2en')">Русский → English</button>
+  </div>
+
+  <div id="app">
+    <div class="stats">
+      <span class="chip">Card <b id="pos">1</b>/<b id="total">19</b></span>
+      <span class="chip">Learned <b id="learned">0</b></span>
+      <span class="chip">To review <b id="review">0</b></span>
+    </div>
+    <div class="bar"><i id="progress"></i></div>
+
+    <div class="scene">
+      <div class="card" id="card">
+        <div class="face front">
+          <span class="tag" id="tagFront">English</span><span class="idx" id="idxF"></span>
+          <div class="word" id="frontWord"></div>
+          <div class="hint" id="hintFront">tap the card to flip</div>
+        </div>
+        <div class="face back">
+          <span class="tag" id="tagBack">Russian</span>
+          <div class="word" id="backWord"></div>
+          <div class="hr-line"></div>
+          <div class="orig" id="backOrig"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="big again" id="btnAgain">↻ Again</button>
+      <button class="big good" id="btnGood">✓ Learned</button>
+    </div>
+    <div class="nav">
+      <button id="btnPrev">← Prev</button>
+      <button id="btnShuffle">⤮ Shuffle</button>
+      <button id="btnRestart">↺ Restart</button>
+      <button id="btnNext">Next →</button>
+    </div>
+  </div>
+
+  <div id="done" class="done hidden">
+    <h2 id="doneTitle">🎉 All cards learned!</h2>
+    <p>Great job — try the other direction, or start this one again.</p>
+    <div class="row">
+      <button class="big good" onclick="restart()">↺ Restart</button>
+      <button class="big" style="background:#e2ecff;color:#2f6fed" onclick="switchMode()">⇄ Switch direction</button>
+    </div>
+  </div>
+
+  <div class="foot">Works offline — no internet needed. Order matches the notebook page.</div>
+</div>
+
+<script>
+const PAIRS = [
+  {en:"attend university",                ru:"посещать университет"},
+  {en:"attend classes",                   ru:"посещать занятия"},
+  {en:"attend a meeting",                 ru:"присутствовать на собрании"},
+  {en:"painting technique",               ru:"техника живописи"},
+  {en:"breathing technique",              ru:"техника дыхания"},
+  {en:"master a technique",               ru:"овладеть техникой / освоить технику"},
+  {en:"country of origin",                ru:"страна происхождения"},
+  {en:"word origin",                      ru:"происхождение слова"},
+  {en:"interior design",                  ru:"дизайн интерьера"},
+  {en:"approve a design",                 ru:"утвердить дизайн"},
+  {en:"school is situated in the center", ru:"школа расположена в центре"},
+  {en:"conveniently situated",            ru:"удобно расположенный"},
+  {en:"three days ago, to be exact",      ru:"три дня назад, если быть точным"},
+  {en:"actively involved in politics",    ru:"активно вовлечён в политику"},
+  {en:"deeply involved in research",      ru:"глубоко вовлечён в исследования"},
+  {en:"involved in charity work",         ru:"вовлечён в благотворительную деятельность"},
+  {en:"reach a goal",                     ru:"достичь цели"},
+  {en:"reach a destination",              ru:"добраться до места назначения"},
+  {en:"reach an agreement",               ru:"достичь соглашения"}
+];
+
+const $ = id => document.getElementById(id);
+const freshState = () => ({ order: PAIRS.map((_,i)=>i), pos: 0, learned: new Set(), review: new Set(), flipped: false });
+let state = { en2ru: freshState(), ru2en: freshState() };
+let mode = "en2ru";
+
+function setMode(m){
+  mode = m;
+  $("tabEn").classList.toggle("active", m === "en2ru");
+  $("tabRu").classList.toggle("active", m === "ru2en");
+  $("app").classList.remove("hidden");
+  $("done").classList.add("hidden");
+  render();
+}
+function switchMode(){ setMode(mode === "en2ru" ? "ru2en" : "en2ru"); }
+
+function render(){
+  const s = state[mode], p = PAIRS[s.order[s.pos]];
+  const front = mode === "en2ru" ? p.en : p.ru;
+  const back  = mode === "en2ru" ? p.ru : p.en;
+  $("tagFront").textContent = mode === "en2ru" ? "English" : "Русский";
+  $("tagBack").textContent  = mode === "en2ru" ? "Russian" : "English";
+  $("hintFront").textContent = mode === "en2ru" ? "tap to see the Russian" : "нажмите, чтобы увидеть английский";
+  $("frontWord").textContent = front;
+  $("backWord").textContent  = back;
+  $("backOrig").textContent  = front;
+  $("idxF").textContent = s.pos + 1;
+  $("pos").textContent = s.pos + 1;
+  $("total").textContent = PAIRS.length;
+  $("learned").textContent = s.learned.size;
+  $("review").textContent = s.review.size;
+  $("progress").style.width = (s.learned.size / PAIRS.length * 100) + "%";
+  $("card").classList.toggle("flip", s.flipped);
+}
+
+function goto(i){
+  const s = state[mode];
+  s.pos = (i + s.order.length) % s.order.length;
+  s.flipped = false;
+  render();
+}
+$("card").addEventListener("click", () => {
+  const s = state[mode]; s.flipped = !s.flipped; render();
+});
+$("btnNext").onclick = () => goto(state[mode].pos + 1);
+$("btnPrev").onclick = () => goto(state[mode].pos - 1);
+$("btnGood").onclick = () => {
+  const s = state[mode], key = s.order[s.pos];
+  s.learned.add(key); s.review.delete(key);
+  if(s.learned.size === PAIRS.length){ finish(); return; }
+  goto(s.pos + 1);
+};
+$("btnAgain").onclick = () => {
+  const s = state[mode];
+  s.review.add(s.order[s.pos]);
+  goto(s.pos + 1);
+};
+$("btnShuffle").onclick = () => {
+  const s = state[mode], cur = s.order[s.pos];
+  do { s.order.sort(() => Math.random() - .5); } while(s.order[0] === cur && s.order.length > 1);
+  s.pos = 0; s.flipped = false; render();
+};
+$("btnRestart").onclick = () => restart();
+
+function restart(){
+  state[mode] = freshState();
+  $("app").classList.remove("hidden");
+  $("done").classList.add("hidden");
+  render();
+}
+function finish(){
+  $("app").classList.add("hidden");
+  $("done").classList.remove("hidden");
+  $("doneTitle").textContent = mode === "en2ru" ? "🎉 All 19 cards learned!" : "🎉 Все 19 карточек выучены!";
+}
+
+document.addEventListener("keydown", e => {
+  const s = state[mode];
+  if(e.key === " "){ e.preventDefault(); s.flipped = !s.flipped; render(); }
+  if(e.key === "ArrowRight") goto(s.pos + 1);
+  if(e.key === "ArrowLeft") goto(s.pos - 1);
+});
+
+setMode("en2ru");
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4a5787cb9738096',t:'MTc5MTk2OTIzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
